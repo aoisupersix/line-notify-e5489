@@ -31,7 +31,11 @@ const crawl = async () => {
     })
     const context = await browser.createIncognitoBrowserContext()
     const page = await context.newPage()
-    await login(page)
+    if (!(await login(page))) {
+        await browser.close()
+        console.log('e5489 login failed.')
+        return
+    }
 
     await browser.close()
 }
