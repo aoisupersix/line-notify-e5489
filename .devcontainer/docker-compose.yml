@@ -1,0 +1,15 @@
+version: '3'
+services:
+  puppeteer-app:
+    build:
+      context: ./puppeteer
+    working_dir: '/app'
+    command: /bin/sh -c "while :; do sleep 10; done"
+    tty: true
+    stdin_open: true
+    volumes:
+      - ..:/app
+    shm_size: 512 # temp file size(MB)
+    cap_add: # https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#tips
+      - SYS_ADMIN
+    env_file: ../.env

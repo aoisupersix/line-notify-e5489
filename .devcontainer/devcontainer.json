@@ -1,0 +1,12 @@
+{
+    "name": "line-notify-e5489",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "puppeteer-app",
+    "workspaceFolder": "/app",
+    "extensions": [
+        "editorconfig.editorconfig",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+    ],
+    "settings": [],
+}

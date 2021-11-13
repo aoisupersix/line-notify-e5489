@@ -1,0 +1,41 @@
+{
+    "name": "line-notify-e5489",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/aoisupersix/line-notify-e5489.git"
+    },
+    "author": "aoisupersix",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/aoisupersix/line-notify-e5489/issues"
+    },
+    "homepage": "https://github.com/aoisupersix/line-notify-e5489#readme",
+    "devDependencies": {
+        "@types/nedb": "^1.8.11",
+        "@types/node": "^14.14.27",
+        "@types/node-cron": "^2.0.3",
+        "@types/puppeteer": "^5.3.1",
+        "@typescript-eslint/eslint-plugin": "^4.15.0",
+        "@typescript-eslint/parser": "^4.15.0",
+        "eslint": "^7.20.0",
+        "eslint-config-prettier": "^7.2.0",
+        "eslint-plugin-prettier": "^3.3.1",
+        "prettier": "^2.2.1",
+        "ts-node": "^9.1.1",
+        "typescript": "^4.1.5"
+    },
+    "dependencies": {
+        "@line/bot-sdk": "^7.2.0",
+        "ncu": "^0.2.1",
+        "nedb-promises": "^4.1.1",
+        "node-cron": "^2.0.3",
+        "puppeteer": "^5.3.1"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2016",
+        "outDir": "out",
+        "lib": [
+            "es2016",
+            "dom",
+        ],
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "rootDir": "src",
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "esModuleInterop": true
+    }
+}
