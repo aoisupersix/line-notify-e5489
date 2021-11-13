@@ -29,7 +29,8 @@ const crawl = async () => {
     const browser = await launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     })
-    const page = await browser.newPage()
+    const context = await browser.createIncognitoBrowserContext()
+    const page = await context.newPage()
     await login(page)
 
     await browser.close()
