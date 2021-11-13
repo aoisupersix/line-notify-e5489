@@ -39,8 +39,9 @@ const crawl = async () => {
 /**
  * Login to the e5489.
  * @param page Puppeteer page object
+ * @returns true if login succeeds, false if it fails.
  */
-const login = async (page: Page) => {
+const login = async (page: Page): Promise<boolean> => {
     await page.goto('https://www.jr-odekake.net/goyoyaku/e5489/login.html')
     await page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] })
 
@@ -55,6 +56,11 @@ const login = async (page: Page) => {
     })
     await page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] })
 
+    const loginError = await page.$('div#contents div.errorBox')
+    if (loginError != null) {
+        return false
+    }
+
     await page
         .frames()
         .find((f) => f.url().indexOf('https://clubj.jr-odekake.net/shared/pc/login_comp_body.do') != -1)
@@ -63,6 +69,8 @@ const login = async (page: Page) => {
             confirmButton.click()
         })
     await page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] })
+
+    return true
 }
 
 // perform checks regularly
