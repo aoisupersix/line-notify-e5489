@@ -2,7 +2,9 @@ FROM alpine:edge
 
 ENV CRON_EXPRESSION="0 0 */1 * *" \
     LINE_TOKEN="line_token" \
-    LINE_USERID="line_userid"
+    LINE_USERID="line_userid" \
+    JWEST_ID="jwest_id" \
+    JWEST_PASSWORD="jwest_password"
 
 RUN apk update
 
