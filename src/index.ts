@@ -1,5 +1,6 @@
 import { launch, Page } from 'puppeteer'
 import { schedule } from 'node-cron'
+import { VacancyResult } from './vacancy-result'
 
 // check environment variables
 const cronExpression = process.env.CRON_EXPRESSION
@@ -88,7 +89,7 @@ const login = async (page: Page): Promise<boolean> => {
  * Check vacancy information
  * @param page E5489 logged in page object
  */
-const checkVacancy = async (page: Page) => {
+const checkVacancy = async (page: Page): Promise<VacancyResult> => {
     await page.goto('https://e5489.jr-odekake.net/e5489/cspc/CBTopMenuPC', { waitUntil: 'networkidle2' })
 
     await Promise.all([
@@ -114,6 +115,21 @@ const checkVacancy = async (page: Page) => {
         page.click('button.decide-button'),
         page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
     ])
+
+    const hasVacancy = await page.evaluate(() => {
+        const results = document.querySelectorAll('table.seat-availability tbody tr td')
+        results.forEach((result) => {
+            if (result.querySelector('img') == null) {
+                return true
+            }
+        })
+
+        return false
+    })
+
+    const screenShot = await page.screenshot()
+
+    return { hasVacancy: hasVacancy, screenShot: screenShot }
 }
 
 // perform checks regularly
