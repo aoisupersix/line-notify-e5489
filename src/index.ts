@@ -37,6 +37,8 @@ const crawl = async () => {
         return
     }
 
+    await checkVacancy(page)
+
     await browser.close()
 }
 
@@ -46,35 +48,70 @@ const crawl = async () => {
  * @returns true if login succeeds, false if it fails.
  */
 const login = async (page: Page): Promise<boolean> => {
-    await page.goto('https://www.jr-odekake.net/goyoyaku/e5489/login.html')
-    await page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] })
+    await page.goto('https://www.jr-odekake.net/goyoyaku/e5489/login.html', { waitUntil: 'networkidle2' })
 
     await page.type('form[name="login2Form"] input[name="id"]', jwestId)
     await page.type('form[name="login2Form"] input[name="password"]', jwestPassword)
 
-    await page.evaluate(() => {
-        const submitButton = document.querySelector(
-            'form[name="login2Form"] input[id="formHiddenSubmitJSButton"]'
-        ) as HTMLInputElement
-        submitButton.click()
-    })
-    await page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] })
+    await Promise.all([
+        page.evaluate(() => {
+            const submitButton = document.querySelector(
+                'form[name="login2Form"] input[id="formHiddenSubmitJSButton"]'
+            ) as HTMLInputElement
+            submitButton.click()
+        }),
+        page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
+    ])
 
     const loginError = await page.$('div#contents div.errorBox')
     if (loginError != null) {
         return false
     }
 
-    await page
-        .frames()
-        .find((f) => f.url().indexOf('https://clubj.jr-odekake.net/shared/pc/login_comp_body.do') != -1)
-        ?.evaluate(() => {
-            const confirmButton = document.querySelector('div#submitBtn a') as HTMLAnchorElement
-            confirmButton.click()
-        })
-    await page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] })
+    await Promise.all([
+        page
+            .frames()
+            .find((f) => f.url().indexOf('https://clubj.jr-odekake.net/shared/pc/login_comp_body.do') != -1)
+            ?.evaluate(() => {
+                const confirmButton = document.querySelector('div#submitBtn a') as HTMLAnchorElement
+                confirmButton.click()
+            }),
+        page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
+    ])
 
     return true
+}
+
+/**
+ * Check vacancy information
+ * @param page E5489 logged in page object
+ */
+const checkVacancy = async (page: Page) => {
+    await page.goto('https://e5489.jr-odekake.net/e5489/cspc/CBTopMenuPC', { waitUntil: 'networkidle2' })
+
+    await Promise.all([
+        page.$eval('form[name="formTrainEntry"]', (form) => (form as HTMLFormElement).submit()),
+        page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
+    ])
+
+    // TODO: make it changeble
+    await page.type('form[name="formMain"] input[name="inputDepartStName"]', '東京')
+    await page.type('form[name="formMain"] input[name="inputArriveStName"]', '米子')
+    await page.select('form[name="formMain"] select#boarding-date', '20211119')
+    await page.select('form[name="formMain"] select[name="inputHour"]', '21')
+    await page.select('form[name="formMain"] select[name="inputMinute"]', '50')
+    await page.click('form[name="formMain"] input[name="inputSearchType"][value="1"]') // 「一度も乗り換えしない」
+
+    await Promise.all([
+        page.click('form[name="formMain"] button.decide-button'),
+        page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
+    ])
+
+    // confirmation
+    await Promise.all([
+        page.click('button.decide-button'),
+        page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
+    ])
 }
 
 // perform checks regularly
