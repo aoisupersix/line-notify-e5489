@@ -135,6 +135,15 @@ const checkVacancy = async (page: Page): Promise<VacancyResult> => {
         page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
     ])
 
+    // skip warnings of after 11pm
+    const errorMessage = await page.$('div.error-message')
+    if (errorMessage != null) {
+        const nextButton = await page.$('a.decide-button')
+        if (nextButton != null) {
+            await Promise.all([nextButton.click(), page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] })])
+        }
+    }
+
     // confirmation
     await Promise.all([
         page.click('button.decide-button'),
