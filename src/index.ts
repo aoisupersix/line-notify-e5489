@@ -40,7 +40,7 @@ const crawl = async () => {
         return
     }
 
-    await checkVacancy(page)
+    const result = await checkVacancy(page)
 
     await browser.close()
 }
@@ -118,13 +118,7 @@ const checkVacancy = async (page: Page): Promise<VacancyResult> => {
 
     const hasVacancy = await page.evaluate(() => {
         const results = document.querySelectorAll('table.seat-availability tbody tr td')
-        results.forEach((result) => {
-            if (result.querySelector('img') == null) {
-                return true
-            }
-        })
-
-        return false
+        return Array.from(results).some((result) => result.querySelector('img[alt="残席なし"]') == null)
     })
 
     const screenShot = await page.screenshot()
