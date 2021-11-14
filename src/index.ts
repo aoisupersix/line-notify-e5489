@@ -1,7 +1,9 @@
+import * as fs from 'fs-extra'
 import { launch, Page } from 'puppeteer'
 import { Client, TextMessage } from '@line/bot-sdk'
 import { schedule } from 'node-cron'
 import { VacancyResult } from './vacancy-result'
+import { CollationCondition, createCollationConditionFromJsonString } from './models/collation-condition'
 
 // check environment variables
 const cronExpression = process.env.CRON_EXPRESSION
@@ -22,6 +24,18 @@ if (jwestId == null) {
 const jwestPassword = process.env.JWEST_PASSWORD
 if (jwestPassword == null) {
     throw new Error('J-WEST password ($JWEST_PASSWORD) is not defined in the environment variable.')
+}
+let initialCondition: CollationCondition = {
+    departureStation: '東京',
+    arrivalStation: '米子',
+    boardingDate: 20211119,
+    boardingHour: 21,
+    boardingMinutes: 50,
+}
+const conditionFile = process.env.CONDITION_FILE
+if (conditionFile != null) {
+    const conditionString = fs.readFileSync(conditionFile, 'utf-8')
+    initialCondition = createCollationConditionFromJsonString(conditionString)
 }
 
 const lineClient = new Client({ channelAccessToken: process.env.LINE_TOKEN })
@@ -107,12 +121,13 @@ const checkVacancy = async (page: Page): Promise<VacancyResult> => {
         page.waitForNavigation({ waitUntil: ['load', 'networkidle2'] }),
     ])
 
-    // TODO: make it changeble
-    await page.type('form[name="formMain"] input[name="inputDepartStName"]', '東京')
-    await page.type('form[name="formMain"] input[name="inputArriveStName"]', '米子')
-    await page.select('form[name="formMain"] select#boarding-date', '20211214')
-    await page.select('form[name="formMain"] select[name="inputHour"]', '21')
-    await page.select('form[name="formMain"] select[name="inputMinute"]', '50')
+    await page.screenshot({ path: 'screen.png' })
+
+    await page.type('form[name="formMain"] input[name="inputDepartStName"]', initialCondition.departureStation)
+    await page.type('form[name="formMain"] input[name="inputArriveStName"]', initialCondition.arrivalStation)
+    await page.select('form[name="formMain"] select#boarding-date', initialCondition.boardingDate.toString())
+    await page.select('form[name="formMain"] select[name="inputHour"]', initialCondition.boardingHour.toString())
+    await page.select('form[name="formMain"] select[name="inputMinute"]', initialCondition.boardingMinutes.toString())
     await page.click('form[name="formMain"] input[name="inputSearchType"][value="1"]') // 「一度も乗り換えしない」
 
     await Promise.all([
