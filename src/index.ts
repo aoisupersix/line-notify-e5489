@@ -1,4 +1,5 @@
 import { launch, Page } from 'puppeteer'
+import { Client, TextMessage } from '@line/bot-sdk'
 import { schedule } from 'node-cron'
 import { VacancyResult } from './vacancy-result'
 
@@ -23,6 +24,8 @@ if (jwestPassword == null) {
     throw new Error('J-WEST password ($JWEST_PASSWORD) is not defined in the environment variable.')
 }
 
+const lineClient = new Client({ channelAccessToken: process.env.LINE_TOKEN })
+
 /**
  * Scrap e5489 and send notifications to LINE as needed
  */
@@ -41,6 +44,13 @@ const crawl = async () => {
     }
 
     const result = await checkVacancy(page)
+    if (result.hasVacancy) {
+        const message: TextMessage = {
+            type: 'text',
+            text: 'e5489に空席があります。',
+        }
+        await lineClient.pushMessage(lineUserId, message)
+    }
 
     await browser.close()
 }
@@ -100,7 +110,7 @@ const checkVacancy = async (page: Page): Promise<VacancyResult> => {
     // TODO: make it changeble
     await page.type('form[name="formMain"] input[name="inputDepartStName"]', '東京')
     await page.type('form[name="formMain"] input[name="inputArriveStName"]', '米子')
-    await page.select('form[name="formMain"] select#boarding-date', '20211119')
+    await page.select('form[name="formMain"] select#boarding-date', '20211214')
     await page.select('form[name="formMain"] select[name="inputHour"]', '21')
     await page.select('form[name="formMain"] select[name="inputMinute"]', '50')
     await page.click('form[name="formMain"] input[name="inputSearchType"][value="1"]') // 「一度も乗り換えしない」
