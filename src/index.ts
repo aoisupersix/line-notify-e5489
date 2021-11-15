@@ -44,6 +44,10 @@ const lineClient = new Client({ channelAccessToken: process.env.LINE_TOKEN })
  * Scrap e5489 and send notifications to LINE as needed
  */
 const crawl = async () => {
+    console.log(
+        `crawl started. condition: ${initialCondition.departureStation}→${initialCondition.arrivalStation}(${initialCondition.boardingDate}:${initialCondition.boardingHour}:${initialCondition.boardingMinutes})`
+    )
+
     const browser = await launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     })
@@ -57,13 +61,19 @@ const crawl = async () => {
         return
     }
 
+    console.log('e5489 login successful.')
+
     const result = await checkVacancy(page)
     if (result.hasVacancy) {
+        console.log('vacant seat available.')
+
         const message: TextMessage = {
             type: 'text',
             text: 'e5489に空席があります。',
         }
         await lineClient.pushMessage(lineUserId, message)
+    } else {
+        console.log('no vacancy.')
     }
 
     await browser.close()
